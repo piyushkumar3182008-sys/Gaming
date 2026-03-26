@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Piyush's Proposal 🎮</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- Styx game background image (dimmed) -->
+    <div class="game-bg"></div>
+    <div class="dark-overlay"></div>
+    <div class="scanline"></div>
+
+    <div class="container">
+        <h1>Kheloge Styx? 🎮</h1>
+        <p class="subtitle">Piyush on the way to become your clone</p>
+
+        <div class="image-container">
+            <img id="main-image"
+                 src="styx-character.jpg"
+                 alt="Styx goblin"
+                 loading="eager"
+                 fetchpriority="high" />
+        </div>
+
+        <div class="buttons">
+            <button id="yes-btn" onclick="handleYesClick()">Yes</button>
+            <button id="no-btn" onclick="handleNoClick()">No</button>
+        </div>
+
+        <div id="tease-toast"></div>
+    </div>
+
+    <!-- BGM -->
+    <audio id="bg-music" loop>
+        <source src="styx-theme.mp3" type="audio/mpeg" />
+    </audio>
+
+    <button id="music-toggle" onclick="toggleMusic()">🔇</button>
+
+    <script>
+        const music = document.getElementById('bg-music');
+        let musicPlaying = false;
+        music.volume = 0.4;
+
+        // Start music instantly on first user interaction
+        const startMusic = () => {
+            music.currentTime = 4;
+            music.play();
+            musicPlaying = true;
+            document.getElementById('music-toggle').textContent = '🔊';
+            ['click','touchstart','keydown'].forEach(e =>
+                document.removeEventListener(e, startMusic));
+        };
+        ['click','touchstart','keydown'].forEach(e =>
+            document.addEventListener(e, startMusic, { once: true }));
+
+        // Loop back to 4s instead of beginning
+        music.addEventListener('timeupdate', () => {
+            if (music.currentTime < 4) music.currentTime = 4;
+        });
+
+        function toggleMusic() {
+            if (musicPlaying) {
+                music.pause();
+                musicPlaying = false;
+                document.getElementById('music-toggle').textContent = '🔇';
+            } else {
+                music.muted = false;
+                music.play();
+                musicPlaying = true;
+                document.getElementById('music-toggle').textContent = '🔊';
+            }
+        }
+
+        // Smooth fade-out before navigating to yes page
+        function fadeOutMusic(callback) {
+            let vol = music.volume;
+            const fade = setInterval(() => {
+                vol -= 0.05;
+                if (vol <= 0) {
+                    clearInterval(fade);
+                    music.pause();
+                    callback();
+                } else {
+                    music.volume = vol;
+                }
+            }, 50); // ~1 second fade
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

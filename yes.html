@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GG! 🎉</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- Styx game background image (dimmed) -->
+    <div class="game-bg"></div>
+    <div class="dark-overlay"></div>
+    <div class="scanline"></div>
+
+    <div class="container yes-container">
+        <h1 class="yes-title">You said YES! 🎉</h1>
+
+        <div class="image-container">
+            <img id="main-image"
+                 src="https://media1.tenor.com/m/9qZhM0uswAYAAAAC/bully-maguire-dance.gif"
+                 alt="Bully Maguire Dance" />
+        </div>
+
+        <p class="yes-message">Aajao Steam VC par👽</p>
+    </div>
+
+    <!-- BGM -->
+    <audio id="bg-music" loop autoplay muted>
+        <source src="bully-dance.mp3" type="audio/mpeg" />
+    </audio>
+
+    <button id="music-toggle" onclick="toggleMusic()">🔊</button>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <script>
+        const music = document.getElementById('bg-music');
+        let musicPlaying = true;
+        music.muted = true;
+        music.volume = 0; // Start silent for fade-in
+        music.currentTime = 105; // Start at 1:45
+        music.play().then(() => {
+            music.muted = false;
+            // Smooth fade-in
+            let vol = 0;
+            const fadeIn = setInterval(() => {
+                vol += 0.05;
+                if (vol >= 0.4) { music.volume = 0.4; clearInterval(fadeIn); }
+                else { music.volume = vol; }
+            }, 80);
+        }).catch(() => {
+            document.addEventListener('click', () => {
+                music.muted = false;
+                music.currentTime = 105;
+                music.volume = 0;
+                music.play().catch(() => {});
+                let vol = 0;
+                const fadeIn = setInterval(() => {
+                    vol += 0.05;
+                    if (vol >= 0.4) { music.volume = 0.4; clearInterval(fadeIn); }
+                    else { music.volume = vol; }
+                }, 80);
+            }, { once: true });
+        });
+        // Loop back to 1:45 instead of beginning
+        music.addEventListener('seeked', () => {
+            if (music.currentTime < 105) music.currentTime = 105;
+        });
+
+        function toggleMusic() {
+            if (musicPlaying) {
+                music.pause();
+                musicPlaying = false;
+                document.getElementById('music-toggle').textContent = '🔇';
+            } else {
+                music.muted = false;
+                music.play();
+                musicPlaying = true;
+                document.getElementById('music-toggle').textContent = '🔊';
+            }
+        }
+
+        // Neon particle animation (gaming-style confetti)
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        const neonColors = [
+            '#00ffaa', '#00cc88', '#ff3b5c', '#cc2244',
+            '#00e5ff', '#76ff03', '#ffab40', '#e040fb',
+            '#ffd700', '#18ffff', '#7c4dff', '#ff6e40'
+        ];
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * -canvas.height;
+                this.size = Math.random() * 5 + 2;
+                this.speedY = Math.random() * 2.5 + 1.5;
+                this.speedX = Math.random() * 1.5 - 0.75;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 8 - 4;
+                this.color = neonColors[Math.floor(Math.random() * neonColors.length)];
+                this.shape = Math.random() > 0.5 ? 'rect' : 'circle';
+                this.glowSize = Math.random() * 8 + 4;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX + Math.sin(this.y * 0.01) * 0.4;
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height + 20) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.shadowBlur = this.glowSize;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = this.color;
+                if (this.shape === 'rect') {
+                    ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size * 0.6);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        const particles = [];
+        for (let i = 0; i < 120; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
